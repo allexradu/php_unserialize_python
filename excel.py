@@ -12,44 +12,9 @@ excel_product_image_url = []
 excel_product_names = []
 work_sheet_index = 2
 table_location = 'excel\\a.xlsx' if platform.system() == 'Windows' else 'excel/a.xlsx'
+cell_index = 0
 
-
-def sanitise_product_names(string_t):
-    """ Replacing all the bad characters that inhibit search"""
-    string_text = str(string_t)
-    if string_text is not None:
-        replace_commas = string_text.replace(',', '') if string_text.find(',') != -1 else string_text
-        replace_stars = replace_commas.replace('*', ' ') if replace_commas.find('*') != -1 else replace_commas
-        replace_slashes = replace_stars.replace(r'/', ' ') if replace_stars.find(r'/') != -1 else replace_stars
-        replace_dollar_signs = replace_slashes.replace(' $', '') if replace_slashes.find(
-            ' $') != -1 else replace_slashes
-        replace_plus_sign = replace_dollar_signs.replace('+', ' ') if replace_dollar_signs.find(
-            '+') != -1 else replace_dollar_signs
-        replace_dots = replace_plus_sign.replace('.', ' ') if replace_plus_sign.find('.') != -1 else replace_plus_sign
-        replace_dashes = replace_dots.replace('-', ' ') if replace_dots.find('-') != -1 else replace_dots
-        replace_small = replace_dashes.replace('<', ' ') if replace_dashes.find('<') != -1 else replace_dashes
-        replace_big = replace_small.replace('>', ' ') if replace_small.find('>') != -1 else replace_small
-        replace_percentage = replace_big.replace(r"%", ' ') if replace_big.find(r"%") != -1 else replace_big
-        replace_pipes = replace_percentage.replace('|', ' ') if replace_percentage.find(
-            '|') != -1 else replace_percentage
-        replace_check_marks = replace_pipes.replace('✅', ' ') if replace_pipes.find('✅') != -1 else replace_pipes
-        replace_double_quotes = replace_check_marks.replace('"', '') if replace_check_marks.find(
-            '"') != 1 else replace_check_marks
-        replace_colon = replace_double_quotes.replace(':', '') if replace_double_quotes.find(
-            ':') != -1 else replace_double_quotes
-        replace_question_mark = replace_colon.replace('?', '') if replace_colon.find('?') != -1 else replace_colon
-        replace_back_slash = replace_question_mark.replace('\\', '') if replace_question_mark.find(
-            '\\') != 1 else replace_check_marks
-        replace_sh = replace_back_slash.replace('Ș', 'S') if replace_back_slash.find('Ș') != 1 else replace_back_slash
-        replace_tz = replace_sh.replace('ț', 't') if replace_sh.find('ț') != 1 else replace_sh
-        replace_enter = replace_tz.replace('\n', ' ') if replace_tz.find('\n') != 1 else replace_tz
-        return replace_enter
-    else:
-        def get_random_string(length):
-            letters = string.ascii_lowercase
-            return ''.join(random.choice(letters) for i in range(length))
-
-        return get_random_string(8)
+d = {}
 
 
 def write_product_code_to_excel(image_file_names, image_names_cell_letter):
@@ -70,24 +35,100 @@ def write_product_code_to_excel(image_file_names, image_names_cell_letter):
     wb.save(table_location)
 
 
-def sanitise_string(string):
-    if isinstance(string, str):
-        sanitised_string = string.encode('unicode_escape').decode('utf-8')
-        return sanitised_string
-    else:
-        return string
+def match_key_value(key_cell, value_cell):
+    global d
+    global work_sheet_index
+    global cell_index
+    cells = ['CA', 'CB', 'CC', 'CD', 'CE', 'CF', 'CG', 'CH', 'CI',
+             'CJ', 'CK', 'CL', 'CM', 'CN', 'CO', 'CP', 'CQ',
+             'CR', 'CS', 'CT', 'CU', 'CV', 'CW', 'CX', 'CY', 'CZ',
+             'DA', 'DB', 'DC', 'DD', 'DE', 'DF', 'DG', 'DO', 'DI',
+             'DJ', 'DK', 'DL', 'DM', 'DN', 'DO', 'DP', 'DQ', 'DR',
+             'DS', 'DT', 'DU', 'DV', 'DW', 'DX', 'DY', 'DZ',
+             'EA', 'EB', 'EC', 'ED', 'EE', 'EF', 'EG', 'EO', 'EI',
+             'EJ', 'EK', 'EL', 'EM', 'EN', 'EO', 'EP', 'EQ', 'ER',
+             'ES', 'ET', 'EU', 'EV', 'EW', 'EX', 'EY', 'EZ',
+             'FA', 'FB', 'FC', 'FD', 'FE', 'FF', 'FG', 'FO', 'FI',
+             'FJ', 'FK', 'FL', 'FM', 'FN', 'FO', 'FP', 'FQ', 'FR',
+             'FS', 'FT', 'FU', 'FV', 'FW', 'FX', 'FY', 'FZ',
+             'GA', 'GB', 'GC', 'GD', 'GE', 'GF', 'GG', 'GO', 'GI',
+             'GJ', 'GK', 'GL', 'GM', 'GN', 'GO', 'GP', 'GQ', 'GR',
+             'GS', 'GT', 'GU', 'GV', 'GW', 'GX', 'GY', 'GZ',
+             'HA', 'HB', 'HC', 'HD', 'HE', 'HF', 'HG', 'HO', 'HI',
+             'HJ', 'HK', 'HL', 'HM', 'HN', 'HO', 'HP', 'HQ', 'HR',
+             'HS', 'HT', 'HU', 'HV', 'HW', 'HX', 'HY', 'HZ',
+             'IA', 'IB', 'IC', 'ID', 'IE', 'IF', 'IG', 'IO', 'II',
+             'IJ', 'IK', 'IL', 'IM', 'IN', 'IO', 'IP', 'IQ', 'IR',
+             'IS', 'IT', 'IU', 'IV', 'IW', 'IX', 'IY', 'IZ',
+             'JA', 'JB', 'JC', 'JD', 'JE', 'JF', 'JG', 'JO', 'JI',
+             'JJ', 'JK', 'JL', 'JM', 'JN', 'JO', 'JP', 'JQ', 'JR',
+             'JS', 'JT', 'JU', 'JV', 'JW', 'JX', 'JY', 'JZ',
+             'KA', 'KB', 'KC', 'KD', 'KE', 'KF', 'KG', 'KO', 'KI',
+             'KJ', 'KK', 'KL', 'KM', 'KN', 'KO', 'KP', 'KQ', 'KR',
+             'KS', 'KT', 'KU', 'KV', 'KW', 'KX', 'KY', 'KZ',
+             'LA', 'LB', 'LC', 'LD', 'LE', 'LF', 'LG', 'LO', 'LI',
+             'LJ', 'LK', 'LL', 'LM', 'LN', 'LO', 'LP', 'LQ', 'LR',
+             'LS', 'LT', 'LU', 'LV', 'LW', 'LX', 'LY', 'LZ',
+             'MA', 'MB', 'MC', 'MD', 'ME', 'MF', 'MG', 'MO', 'MI',
+             'MJ', 'MK', 'ML', 'MM', 'MN', 'MO', 'MP', 'MQ', 'MR',
+             'MS', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ',
+             'NA', 'NB', 'NC', 'ND', 'NE', 'NF', 'NG', 'NO', 'NI',
+             'NJ', 'NK', 'NL', 'NM', 'NN', 'NO', 'NP', 'NQ', 'NR',
+             'NS', 'NT', 'NU', 'NV', 'NW', 'NX', 'NY', 'NZ',
+             'OA', 'OB', 'OC', 'OD', 'OE', 'OF', 'OG', 'OO', 'OI',
+             'OJ', 'OK', 'OL', 'OM', 'ON', 'OO', 'OP', 'OQ', 'OR',
+             'OS', 'OT', 'OU', 'OV', 'OW', 'OX', 'OY', 'OZ',
+             'PA', 'PB', 'PC', 'PD', 'PE', 'PF', 'PG', 'PO', 'PI',
+             'PJ', 'PK', 'PL', 'PM', 'PN', 'PO', 'PP', 'PQ', 'PR',
+             'PS', 'PT', 'PU', 'PV', 'PW', 'PX', 'PY', 'PZ',
+             'QA', 'QB', 'QC', 'QD', 'QE', 'QF', 'QG', 'QO', 'QI',
+             'QJ', 'QK', 'QL', 'QM', 'QN', 'QO', 'QP', 'QQ', 'QR',
+             'QS', 'QT', 'QU', 'QV', 'QW', 'QX', 'QY', 'QZ',
+             'RA', 'RB', 'RC', 'RD', 'RE', 'RF', 'RG', 'RO', 'RI',
+             'RJ', 'RK', 'RL', 'RM', 'RN', 'RO', 'RP', 'RQ', 'RR',
+             'RS', 'RT', 'RU', 'RV', 'RW', 'RX', 'RY', 'RZ',
 
+             ]
+    wb = load_workbook(table_location)  # Work Book
+    ws = wb.active  # Work Sheet
+    column = ws['A']
 
-def read_image_urls(cell_letter):
-    global excel_product_image_url
-    get_work_sheet_index()
-    excel_product_image_url = get_all_the_rows_from_column(cell_letter)
+    work_sheet_index = 2
 
+    for i in range(len(column)):
+        key = ws[key_cell + str(work_sheet_index)].value
+        cell = cells[cell_index]
+        value = ws[value_cell + str(work_sheet_index)].value
 
-def read_product_names(cell_letter):
-    global excel_product_names
-    get_work_sheet_index()
-    excel_product_names = get_all_the_rows_from_column(cell_letter)
+        if key not in d:
+            print('cell index: NEW', cell_index)
+            print('work sheet index: ', work_sheet_index)
+            d.update({key: cell})
+            ws[cell + '1'] = key
+            key_to_look_in_dict = ws[key_cell + str(work_sheet_index)].value
+            # print(f'Key cell is: {key_cell}{str(work_sheet_index)} we to look in the dict: ', key_to_look_in_dict)
+            print(f'in cell {d[key_to_look_in_dict]}{str(work_sheet_index)} we put the value: '
+                  f'{ws[value_cell + str(work_sheet_index)].value}  ')
+            value = ws[value_cell + str(work_sheet_index)].value
+            ws[cell + str(work_sheet_index)] = value
+            cell_index += 1
+            work_sheet_index += 1
+        else:
+            print('cell index: EXISTING', cell_index)
+            print('work sheet index: ', work_sheet_index)
+            key_to_look_in_dict = ws[key_cell + str(work_sheet_index)].value
+            # print(f'Key cell is: {key_cell}{str(work_sheet_index)} we to look in the dict: ', key_to_look_in_dict)
+            print(f'in cell {d[key_to_look_in_dict]}{str(work_sheet_index)} we put the value: '
+                  f'{ws[value_cell + str(work_sheet_index)].value}  ')
+            if ws[d[key_to_look_in_dict] + str(work_sheet_index)].value is None:
+                print('work sheet index: ', work_sheet_index)
+                ws[d[key_to_look_in_dict] + str(work_sheet_index)] = ws[
+                    value_cell + str(work_sheet_index)].value
+            else:
+                print('error')
+            work_sheet_index += 1
+    wb.save(table_location)
+    return cell_index
 
 
 def get_all_the_rows_from_column(cell_letter):
